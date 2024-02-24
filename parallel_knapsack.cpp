@@ -23,8 +23,7 @@ int knapsack(const std::vector<Item>& items, int capacity, int start, int end) {
   return table[capacity];
 }
 
-int parallelKnapsack(const std::vector<Item>& items, int capacity) {
-  int num_threads = std::thread::hardware_concurrency();
+int parallelKnapsack(const std::vector<Item>& items, int capacity, int num_threads) {
   std::vector<WorkQueue> work_queues(num_threads); // Array of WorkQueue objects
 
   std::vector<std::future<int>> futures;

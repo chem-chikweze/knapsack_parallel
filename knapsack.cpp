@@ -112,23 +112,23 @@ int main(int argc, char* argv[])
 	inputFile.close();
 	return 0;
 	
-	// //initialize the array for dynamic programming
-	// opt = new int*[n];
-	// for(int i=0; i<n; i++)
-	// {
-	// 	opt[i] = new int[c+1];
-	// 	//intialize to -1
-	// 	for(int j=0; j<c+1; j++)
-	// 	{
-	// 		opt[i][j] = -1;
-	// 	}
-	// }
+	//initialize the array for dynamic programming
+	opt = new int*[n];
+	for(int i=0; i<n; i++)
+	{
+		opt[i] = new int[c+1];
+		//intialize to -1
+		for(int j=0; j<c+1; j++)
+		{
+			opt[i][j] = -1;
+		}
+	}
 	
-	// int highest = knapsack(n, 0, c);
+	int highest = knapsack(n, 0, c);
 	
-	// auto end = high_resolution_clock::now();
-	// duration<double, milli> time = end - start;
+	auto end = high_resolution_clock::now();
+	duration<double, milli> time = end - start;
 	
-	// cout << "The maximum value is " << highest << "." << endl;
-	// cout<<"Duration: "<<time.count() <<" miliseconds."<<endl;
+	cout << "The maximum value is " << highest << "." << endl;
+	cout<<"Duration: "<<time.count() <<" miliseconds."<<endl;
 }
