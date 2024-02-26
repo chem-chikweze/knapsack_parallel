@@ -17,7 +17,7 @@ public:
     template <class F>
     void enqueue(F &&f);
 
-    // void wait();
+    void wait();
     void barrier();
 
     size_t getBarrier();

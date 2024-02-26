@@ -1,4 +1,5 @@
 #include "ThreadPool.hpp"
+#include <iostream>
 
 ThreadPool::ThreadPool(size_t num_threads, size_t barrier_threshold) : stop(false)
 {
@@ -15,7 +16,7 @@ ThreadPool::ThreadPool(size_t num_threads, size_t barrier_threshold) : stop(fals
                         std::unique_lock<std::mutex> lock(this->queue_mutex);
                         this->condition.wait(lock, [this]
                                              { return this->stop || !this->tasks.empty(); });
-                        if (this->stop || this->tasks.empty())
+                        if (this->stop && this->tasks.empty())
                         {
                             return;
                         }
@@ -54,28 +55,36 @@ ThreadPool::~ThreadPool()
 void ThreadPool::barrier()
 {
     std::unique_lock<std::mutex> lock(barrier_mutex);
-    barrier_count++;
-    if (barrier_count == barrier_threshold)
-    {
+
+    if (tasks.empty() && std::all_of(threads.begin(), threads.end(),  [](std::thread& t) { return !t.joinable(); })) {
         barrier_condition.notify_all();
-        barrier_count = 0;
-    }
-    else
-    {
-        barrier_condition.wait(lock, [this]
-                               { return this->barrier_count == this->barrier_threshold; });
+    } else {
+        barrier_condition.wait(lock, [this] { 
+            return tasks.empty() && std::all_of(threads.begin(), threads.end(), 
+                                                                    [](std::thread& t) { return !t.joinable(); });
+        });
     }
 }
 
 size_t ThreadPool::getBarrier()
 {
-    return this->barrier_count;
+    return this->tasks.size();
 }
 
+void ThreadPool::wait() {
+    std::unique_lock<std::mutex> lock(queue_mutex);
+
+    if (tasks.empty() && std::all_of(threads.begin(), threads.end(),  [](std::thread& t) { return !t.joinable(); })) {
+        condition.notify_all();
+    } else {
+        condition.wait(lock, [this] { 
+            return tasks.empty() && std::all_of(threads.begin(), threads.end(), 
+                                                                    [](std::thread& t) { return !t.joinable(); });
+        });
+    }
+}
 
 // # MOD: changed to || instead of &&
-
-
 // void ThreadPool::wait()
 // {
 //     {
@@ -85,7 +94,9 @@ size_t ThreadPool::getBarrier()
 //     condition.notify_all();
 //     for (std::thread &worker : threads)
 //     {
-//         worker.join();
+//         if (worker.joinable()) {
+//              worker.join();
+//         }
 //     }
 // }
 

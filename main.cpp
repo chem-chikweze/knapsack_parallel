@@ -11,6 +11,8 @@
 
 using namespace std;
 
+std::atomic<int> completed_tasks(0);
+
 void compute_rows(ThreadPool &pool, std::vector<std::vector<int>> &dp, const std::vector<int> &weights, const std::vector<int> &values, int start, int end, int capacity)
 {
     for (int i = start; i <= end; i++)
@@ -20,6 +22,7 @@ void compute_rows(ThreadPool &pool, std::vector<std::vector<int>> &dp, const std
         // Loop through j and enqueue tasks for each iteration
         for (int j = 1; j <= capacity; j++)
         {
+            // cout << pool.getBarrier() << "\n";
             pool.enqueue([i, j, &dp, &weights, &values]()
                          {
                 if (weights[i - 1] <= j)
@@ -31,10 +34,21 @@ void compute_rows(ThreadPool &pool, std::vector<std::vector<int>> &dp, const std
                 {   
                     // cout << "i: " << i <<" j: " << j << "(i,j): " << dp[i][j] << "\n";
                     dp[i][j] = dp[i - 1][j];
-                } });
+                } 
+                completed_tasks.fetch_add(1, std::memory_order_relaxed);
+                });
+                // cout << j << endl;
         }
+        // cout << "Added all tasks for row: " << i << endl;
+        
+        // Wait for all tasks in this row to finish
+        while (completed_tasks.load(std::memory_order_relaxed) != capacity) {
+            // Spin until all tasks complete
+        }
+        completed_tasks.store(0); // Reset the counter for the next row
         // cout << pool.getBarrier() << "\n";
         // pool.barrier();
+        // cout << "Completed row " << i << endl;
     }
 }
 
@@ -49,7 +63,7 @@ int main(int argc, char *argv[])
 
     using chrono::duration;
     using chrono::high_resolution_clock;
-    auto start = high_resolution_clock::now();
+    auto start_time = high_resolution_clock::now();
 
     string filename = argv[1];
     int num_threads = atoi(argv[2]);
@@ -83,13 +97,14 @@ int main(int argc, char *argv[])
         values.push_back(value);
     }
 
-    cout << "Weights: " << weights.size() << ", num_threads: " << num_threads << ", n: " << n << "\n";
-    ThreadPool pool(num_threads, c);
+    // cout << "Weights: " << weights.size() << ", num_threads: " << num_threads << ", n: " << n << "\n";
+    ThreadPool pool(num_threads, num_threads);
     compute_rows(pool, dp, weights, values, 1, n, c);
+    // pool.wait();
 
-    std::chrono::minutes wait_duration(3);
-    std::this_thread::sleep_for(wait_duration);
-    cout << "Maximum for dp: " << dp[n][c] << endl;
+    duration<double, milli> time = high_resolution_clock::now() - start_time;
+    cout << "M: " << dp[n][c] << "\t";
+    cout<<"D: "<<time.count() <<" ms."<<endl;
     return 0;
 }
 
