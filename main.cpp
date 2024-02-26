@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     ThreadPool pool(num_threads, c);
     compute_rows(pool, dp, weights, values, 1, n, c);
 
-    std::chrono::minutes wait_duration(10);
+    std::chrono::minutes wait_duration(3);
     std::this_thread::sleep_for(wait_duration);
     cout << "Maximum for dp: " << dp[n][c] << endl;
     return 0;
