@@ -7,19 +7,16 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include "ThreadPool.hpp"
+#include "ThreadPool.cpp"
 
-int knapsack(const std::vector<int> &weights, const std::vector<int> &values, int capacity)
-{
-    // Implement knapsack algorithm here
-    // This function should return the maximum value that can be achieved
-    return 0; // Placeholder return value
-}
+using namespace std;
 
-void compute_rows(ThreadPool &pool, std::vector<std::vector<double>> &dp, const std::vector<int> &weights, const std::vector<int> &values, int start, int end, int capacity)
+void compute_rows(ThreadPool &pool, std::vector<std::vector<int>> &dp, const std::vector<int> &weights, const std::vector<int> &values, int start, int end, int capacity)
 {
     for (int i = start; i <= end; i++)
     {
+        // cout << "starting row:  " << i << endl;
+
         // Loop through j and enqueue tasks for each iteration
         for (int j = 1; j <= capacity; j++)
         {
@@ -27,22 +24,26 @@ void compute_rows(ThreadPool &pool, std::vector<std::vector<double>> &dp, const 
                          {
                 if (weights[i - 1] <= j)
                 {
+                    // cout << "i: " << i <<" j: "<< j << " (i-1)(j): " << dp[i - 1][j]  << values[i - 1] + dp[i - 1][j - weights[i - 1]] << "\n";
                     dp[i][j] = std::max(dp[i - 1][j], values[i - 1] + dp[i - 1][j - weights[i - 1]]);
                 }
                 else
-                {
+                {   
+                    // cout << "i: " << i <<" j: " << j << "(i,j): " << dp[i][j] << "\n";
                     dp[i][j] = dp[i - 1][j];
                 } });
         }
+        // cout << pool.getBarrier() << "\n";
+        // pool.barrier();
     }
 }
 
-using namespace std;
 int main(int argc, char *argv[])
 {
     if (argc != 3)
     {
-        cerr << "Usage: " << argv[0] << " <input_file> <num_threads> " << endl;
+        cerr << "Usage: " << argv[0] << " <input_file> <num_threads> "
+             << "\n";
         return 1;
     }
 
@@ -56,7 +57,7 @@ int main(int argc, char *argv[])
 
     if (!inputFile.is_open())
     {
-        cerr << "Error: Could not open file " << filename << endl;
+        cerr << "Error: Could not open file " << filename << "\n";
         return 1;
     }
 
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
 
     std::vector<int> weights;
     std::vector<int> values;
-    std::vector<std::vector<double>> dp(n + 1, std::vector<double>(c + 1, 0.0));
+    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(c + 1, 0.0));
 
     string line;
     while (getline(inputFile, line))
@@ -82,8 +83,15 @@ int main(int argc, char *argv[])
         values.push_back(value);
     }
 
-    ThreadPool pool(num_threads);
+    cout << "Weights: " << weights.size() << ", num_threads: " << num_threads << ", n: " << n << "\n";
+    ThreadPool pool(num_threads, c);
     compute_rows(pool, dp, weights, values, 1, n, c);
-    pool.wait();
+
+    std::chrono::minutes wait_duration(10);
+    std::this_thread::sleep_for(wait_duration);
+    cout << "Maximum for dp: " << dp[n][c] << endl;
     return 0;
 }
+
+// g++ -std=c++11 main.cpp ThreadPool.cpp -o my_program -pthread
+// g++ -std=c++11 main.cpp -o my_program -pthread

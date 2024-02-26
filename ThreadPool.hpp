@@ -11,14 +11,16 @@
 class ThreadPool
 {
 public:
-    ThreadPool(size_t num_threads);
+    ThreadPool(size_t num_threads, size_t barrier_threshold);
+    ~ThreadPool();
 
     template <class F>
     void enqueue(F &&f);
 
-    void wait();
+    // void wait();
+    void barrier();
 
-    ~ThreadPool();
+    size_t getBarrier();
 
 private:
     std::vector<std::thread> threads;
@@ -27,6 +29,11 @@ private:
     std::mutex queue_mutex;
     std::condition_variable condition;
     bool stop;
+
+    std::mutex barrier_mutex;
+    std::condition_variable barrier_condition;
+    size_t barrier_count;
+    size_t barrier_threshold;
 };
 
 #endif /* THREADPOOL_H */
