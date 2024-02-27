@@ -56,13 +56,17 @@ void ThreadPool::barrier()
 {
     std::unique_lock<std::mutex> lock(barrier_mutex);
 
-    if (tasks.empty() && std::all_of(threads.begin(), threads.end(),  [](std::thread& t) { return !t.joinable(); })) {
+    if (tasks.empty() && std::all_of(threads.begin(), threads.end(), [](std::thread &t)
+                                     { return !t.joinable(); }))
+    {
         barrier_condition.notify_all();
-    } else {
-        barrier_condition.wait(lock, [this] { 
-            return tasks.empty() && std::all_of(threads.begin(), threads.end(), 
-                                                                    [](std::thread& t) { return !t.joinable(); });
-        });
+    }
+    else
+    {
+        barrier_condition.wait(lock, [this]
+                               { return tasks.empty() && std::all_of(threads.begin(), threads.end(),
+                                                                     [](std::thread &t)
+                                                                     { return !t.joinable(); }); });
     }
 }
 
@@ -71,17 +75,35 @@ size_t ThreadPool::getBarrier()
     return this->tasks.size();
 }
 
-void ThreadPool::wait() {
+void ThreadPool::wait()
+{
     std::unique_lock<std::mutex> lock(queue_mutex);
 
-    if (tasks.empty() && std::all_of(threads.begin(), threads.end(),  [](std::thread& t) { return !t.joinable(); })) {
+    if (tasks.empty() && std::all_of(threads.begin(), threads.end(), [](std::thread &t)
+                                     { return !t.joinable(); }))
+    {
         condition.notify_all();
-    } else {
-        condition.wait(lock, [this] { 
-            return tasks.empty() && std::all_of(threads.begin(), threads.end(), 
-                                                                    [](std::thread& t) { return !t.joinable(); });
-        });
     }
+    else
+    {
+        condition.wait(lock, [this]
+                       { return tasks.empty() && std::all_of(threads.begin(), threads.end(),
+                                                             [](std::thread &t)
+                                                             { return !t.joinable(); }); });
+    }
+}
+
+template <class F>
+void ThreadPool::enqueueBatch(const std::vector<F> &batch_tasks)
+{
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        for (const auto &task : batch_tasks)
+        {
+            tasks.emplace(task);
+        }
+    }
+    condition.notify_all();
 }
 
 // # MOD: changed to || instead of &&

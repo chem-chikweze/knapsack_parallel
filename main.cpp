@@ -17,38 +17,55 @@ void compute_rows(ThreadPool &pool, std::vector<std::vector<int>> &dp, const std
 {
     for (int i = start; i <= end; i++)
     {
-        // cout << "starting row:  " << i << endl;
-
-        // Loop through j and enqueue tasks for each iteration
+        // TODO: faster than implementation 1 but still slow. 915344
+        std::vector<std::function<void()>> batch_tasks;
         for (int j = 1; j <= capacity; j++)
         {
-            // cout << pool.getBarrier() << "\n";
-            pool.enqueue([i, j, &dp, &weights, &values]()
-                         {
-                if (weights[i - 1] <= j)
-                {
-                    // cout << "i: " << i <<" j: "<< j << " (i-1)(j): " << dp[i - 1][j]  << values[i - 1] + dp[i - 1][j - weights[i - 1]] << "\n";
-                    dp[i][j] = std::max(dp[i - 1][j], values[i - 1] + dp[i - 1][j - weights[i - 1]]);
-                }
-                else
-                {   
-                    // cout << "i: " << i <<" j: " << j << "(i,j): " << dp[i][j] << "\n";
-                    dp[i][j] = dp[i - 1][j];
-                } 
-                completed_tasks.fetch_add(1, std::memory_order_relaxed);
-                });
-                // cout << j << endl;
+            batch_tasks.push_back([i, j, &dp, &weights, &values]()
+                                  {
+                                       if (weights[i - 1] <= j)
+                                       {
+                                           dp[i][j] = std::max(dp[i - 1][j], values[i - 1] + dp[i - 1][j - weights[i - 1]]);
+                                       }
+                                       else
+                                       {
+                                           dp[i][j] = dp[i - 1][j];
+                                       } });
         }
-        // cout << "Added all tasks for row: " << i << endl;
-        
-        // Wait for all tasks in this row to finish
-        while (completed_tasks.load(std::memory_order_relaxed) != capacity) {
-            // Spin until all tasks complete
-        }
-        completed_tasks.store(0); // Reset the counter for the next row
-        // cout << pool.getBarrier() << "\n";
-        // pool.barrier();
-        // cout << "Completed row " << i << endl;
+        pool.enqueueBatch(batch_tasks);
+
+        // TODO: Too slow: 2160120
+        // // cout << "starting row:  " << i << endl;
+        // // Loop through j and enqueue tasks for each iteration
+        // for (int j = 1; j <= capacity; j++)
+        // {
+        //     // cout << pool.getBarrier() << "\n";
+        //     pool.enqueue([i, j, &dp, &weights, &values]()
+        //                  {
+        //         if (weights[i - 1] <= j)
+        //         {
+        //             // cout << "i: " << i <<" j: "<< j << " (i-1)(j): " << dp[i - 1][j]  << values[i - 1] + dp[i - 1][j - weights[i - 1]] << "\n";
+        //             dp[i][j] = std::max(dp[i - 1][j], values[i - 1] + dp[i - 1][j - weights[i - 1]]);
+        //         }
+        //         else
+        //         {
+        //             // cout << "i: " << i <<" j: " << j << "(i,j): " << dp[i][j] << "\n";
+        //             dp[i][j] = dp[i - 1][j];
+        //         }
+        //         completed_tasks.fetch_add(1, std::memory_order_relaxed); });
+        //     // cout << j << endl;
+        // }
+        // // cout << "Added all tasks for row: " << i << endl;
+
+        // // Wait for all tasks in this row to finish
+        // while (completed_tasks.load(std::memory_order_relaxed) != capacity)
+        // {
+        //     // Spin until all tasks complete
+        // }
+        // completed_tasks.store(0); // Reset the counter for the next row
+        // // // cout << pool.getBarrier() << "\n";
+        // // // pool.barrier();
+        // // cout << "Completed row " << i << endl;
     }
 }
 
@@ -104,7 +121,8 @@ int main(int argc, char *argv[])
 
     duration<double, milli> time = high_resolution_clock::now() - start_time;
     cout << "M: " << dp[n][c] << "\t";
-    cout<<"D: "<<time.count() <<" ms."<<endl;
+    cout << "D: " << time.count() << " ms." << endl;
+    pool.~ThreadPool();
     return 0;
 }
 

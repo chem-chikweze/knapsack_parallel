@@ -22,6 +22,9 @@ public:
 
     size_t getBarrier();
 
+    template <class F>
+    void enqueueBatch(const std::vector<F> &batch_tasks);
+
 private:
     std::vector<std::thread> threads;
     std::queue<std::function<void()>> tasks;

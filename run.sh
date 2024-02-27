@@ -23,15 +23,15 @@ g++ -std=c++11 main.cpp -o my_program -pthread
 run_knap_helper() {
     input_file=$1
     num_threads=$2
-    for i in {1..100}; do
-        ./my_program "$input_file" "$num_threads" >> output.txt
+    for i in {1..10}; do
+        ./my_program "$input_file" "$num_threads" >> output2.txt
     done
 }
 
 # Run knap_helper for each input file with different thread counts
 for input_file in "$input_folder"/*.txt; do
     filename=${input_file##*/} 
-    echo "$filename $num_threads" >> output.txt
+    echo "$filename $num_threads" >> output2.txt
   
     echo "Running knapsack for $input_file with $num_threads threads"
     run_knap_helper "$input_file" "$num_threads"
