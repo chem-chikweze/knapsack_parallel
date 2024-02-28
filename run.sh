@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check for correct number of arguments
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <input folder> <num_threads>"
     exit 1
 fi
@@ -28,6 +28,7 @@ run_knap_helper() {
     done
 }
 
+
 # Run knap_helper for each input file with different thread counts
 for input_file in "$input_folder"/*.txt; do
     filename=${input_file##*/} 
@@ -37,23 +38,3 @@ for input_file in "$input_folder"/*.txt; do
     run_knap_helper "$input_file" "$num_threads"
     echo ""
 done
-
-
-
-
-
-
-# for i in {1..10}; do
-#     ./my_program inputs/2.txt 8 >> output.txt
-# done
-
-# /**Weights: 10000, num_threads: 8, n: 10000
-# Maximum for dp: 304865
-# Weights: 10000, num_threads: 8, n: 10000
-# Maximum for dp: 304865
-# Weights: 10000, num_threads: 8, n: 10000
-# Maximum for dp: 304865
-# Weights: 10000, num_threads: 8, n: 10000
-# Maximum for dp: 304865
-# Weights: 10000, num_threads: 8, n: 10000
-# Maximum for dp: 304865
