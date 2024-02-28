@@ -114,7 +114,6 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
 #include <thread>
 
 // ... other includes
@@ -132,7 +131,8 @@ void compute_rows(std::vector<std::vector<double>> &dp, const std::vector<int> &
         // Loop through j and schedule tasks in the thread pool
         for (int j = 1; j <= c; j++)
         {
-            tasks.push_back(pool.enqueue([&, i, j, &dp, &weights, &values]() {
+            tasks.push_back(pool.enqueue([&, i, j, &dp, &weights, &values]()
+                                         {
                 if (weights[i - 1] <= j)
                 {
                     dp[i][j] = std::max(dp[i - 1][j], values[i - 1] + dp[i - 1][j - weights[i - 1]]);
@@ -140,19 +140,16 @@ void compute_rows(std::vector<std::vector<double>> &dp, const std::vector<int> &
                 else
                 {
                     dp[i][j] = dp[i - 1][j];
-                }
-            }));
+                } }));
         }
 
         // Wait for all tasks to finish before continuing to the next iteration of the outer loop
-        for (auto& task : tasks)
+        for (auto &task : tasks)
         {
             task.get();
         }
     }
 }
-
-
 
 void compute_rows(std::vector<std::vector<double>> &dp, const std::vector<int> &weights, const std::vector<int> &values, int start, int end, int c)
 {

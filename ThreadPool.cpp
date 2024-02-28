@@ -48,7 +48,10 @@ ThreadPool::~ThreadPool()
     condition.notify_all();
     for (std::thread &worker : threads)
     {
-        worker.join();
+        if (worker.joinable())
+        {
+            worker.join();
+        }
     }
 }
 
