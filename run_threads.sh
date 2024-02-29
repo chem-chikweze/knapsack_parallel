@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # List of thread counts to iterate through
-thread_counts=(1 2 4 8 16)
+# thread_counts=(1 2 4 8 16 3,5,6,7,9,10,11,12,13,14)
 
 # Check for correct number of arguments
 if [ "$#" -ne 1 ]; then
@@ -35,7 +35,7 @@ for input_file in "$input_folder"/*.txt; do
   filename=${input_file##*/}
 
   # Loop through each thread count in the list
-  for num_threads in "${thread_counts[@]}"; do
+  for num_threads in {1..16}; do
     echo "$filename $num_threads" >> output.txt
     echo "Running knapsack for $input_file with $num_threads threads"
     run_knap_helper "$input_file" "$num_threads"

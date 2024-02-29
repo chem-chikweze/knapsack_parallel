@@ -12,7 +12,7 @@ using namespace std;
 int knapsack_parallel(int n, int capacity, const std::vector<int> &weights, const std::vector<int> &values, int num_threads)
 {
     std::vector<std::vector<int>> dp(n + 1, std::vector<int>(capacity + 1, 0));
-
+    
     std::vector<std::thread> threads;
     for (int i = 1; i <= n; ++i)
     {
