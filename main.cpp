@@ -7,16 +7,19 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <atomic>
+
 using namespace std;
 
 int knapsack_parallel_1dim(int n, int capacity, const std::vector<int> &weights, const std::vector<int> &values, int num_threads)
 {
-    std::vector<std::atomic<int>> dp(capacity + 1, 0);
+    std::vector<int> dp(capacity + 1, 0);
 
     std::vector<std::thread> threads;
     for (int i = 1; i <= n; ++i)
     {
         int cols_per_thread = std::ceil(static_cast<double>(capacity) / num_threads);
+        std::vector<int> current_row(capacity + 1, 0);
 
         for (int t = 0; t < num_threads; ++t)
         {
@@ -29,8 +32,10 @@ int knapsack_parallel_1dim(int n, int capacity, const std::vector<int> &weights,
                 {
                     if (weights[row - 1] <= w)
                     {
-                        int new_value = std::max(dp[w].load(), dp[w - weights[row - 1]].load() + values[row - 1]);
-                        dp[w].store(new_value);
+                        current_row[w] = std::max(dp[w], dp[w - weights[row - 1]] + values[row - 1]);
+                    }
+                    else {
+                        current_row[w] = dp[w];
                     }
                 } },
                                  i, start_col, end_col);
@@ -41,9 +46,10 @@ int knapsack_parallel_1dim(int n, int capacity, const std::vector<int> &weights,
             thread.join();
         }
         threads.clear();
+        dp = std::move(current_row);
     }
 
-    return dp[capacity].load();
+    return dp[capacity];
 }
 
 int knapsack_parallel(int n, int capacity, const std::vector<int> &weights, const std::vector<int> &values, int num_threads)
