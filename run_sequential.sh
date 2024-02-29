@@ -1,6 +1,14 @@
 #!/bin/bash
 
 
+#SBATCH --job-name=knap_sequential       
+#SBATCH --output=knap_sequential.log    
+#SBATCH --error=knap_sequential_error.log  
+#SBATCH --time=01:00:00                  
+#SBATCH --cpus-per-task=1                
+#SBATCH --mem=8G                        
+
+
 # Check for correct number of arguments
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 <input folder>"
