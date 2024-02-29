@@ -7,94 +7,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <future>
-
-#include "ThreadPool.cpp"
-
 using namespace std;
-
-// TODO: CODE CLEANUP
-std::atomic<int> completed_tasks(0);
-void compute_rows(ThreadPool &pool, std::vector<std::vector<int>> &dp, const std::vector<int> &weights, const std::vector<int> &values, int start, int end, int capacity)
-{
-    for (int i = start; i <= end; i++)
-    {
-        // TODO: Too slow: 2160120
-        for (int j = 1; j <= capacity; j++)
-        {
-            pool.enqueue([i, j, &dp, &weights, &values]()
-                         {
-                if (weights[i - 1] <= j)
-                {
-                    dp[i][j] = std::max(dp[i - 1][j], values[i - 1] + dp[i - 1][j - weights[i - 1]]);
-                }
-                else
-                {
-                    dp[i][j] = dp[i - 1][j];
-                }
-                completed_tasks.fetch_add(1, std::memory_order_relaxed); });
-        }
-
-        while (completed_tasks.load(std::memory_order_relaxed) != capacity)
-        {
-            // Spin until all tasks complete
-        }
-        completed_tasks.store(0); // Reset the counter for the next row
-        // // pool.barrier();
-        // cout << "Completed row " << i << endl;
-    }
-}
-
-void compute_rows_futures(std::vector<std::vector<int>> &dp, const std::vector<int> &weights, const std::vector<int> &values, int start, int end, int capacity)
-{
-    for (int i = start; i <= end; i++)
-    {
-        // // TODO: Too slow: 2160120
-        // for (int j = 1; j <= capacity; j++)
-        // {
-        //     pool.enqueue([i, j, &dp, &weights, &values]()
-        //                  {
-        //         if (weights[i - 1] <= j)
-        //         {
-        //             dp[i][j] = std::max(dp[i - 1][j], values[i - 1] + dp[i - 1][j - weights[i - 1]]);
-        //         }
-        //         else
-        //         {
-        //             dp[i][j] = dp[i - 1][j];
-        //         }
-        //         completed_tasks.fetch_add(1, std::memory_order_relaxed); });
-        // }
-
-        // while (completed_tasks.load(std::memory_order_relaxed) != capacity)
-        // {
-        //     // Spin until all tasks complete
-        // }
-        // completed_tasks.store(0); // Reset the counter for the next row
-        // // // pool.barrier();
-        // // cout << "Completed row " << i << endl;
-
-        std::vector<std::future<void>> futures;
-        for (int w = 1; w <= capacity; ++w)
-        {
-            futures.push_back(std::async(
-                std::launch::async, [&](int i, int w)
-                {
-                if (weights[i - 1] <= w)
-                {
-                    dp[i][w] = std::max(dp[i - 1][w], dp[i - 1][w - weights[i - 1]] + values[i - 1]);
-                }
-                else
-                {
-                    dp[i][w] = dp[i - 1][w];
-                } },
-                i, w));
-        }
-        for (auto &future : futures)
-        {
-            future.wait();
-        }
-    }
-}
 
 int knapsack_parallel(int n, int capacity, const std::vector<int> &weights, const std::vector<int> &values, int num_threads)
 {
@@ -186,7 +99,6 @@ int main(int argc, char *argv[])
 
     std::vector<int> weights;
     std::vector<int> values;
-    // std::vector<std::vector<int>> dp(n + 1, std::vector<int>(c + 1, 0.0));
 
     string line;
     while (getline(inputFile, line))
@@ -207,9 +119,7 @@ int main(int argc, char *argv[])
 
     duration<double, milli>
         time = high_resolution_clock::now() - start_time;
-    // cout << "M: " << dp[n][c] << "\t";
     cout << "M: " << res << "\t";
-
     cout << "D: " << time.count() << " ms." << endl;
     return 0;
 }
