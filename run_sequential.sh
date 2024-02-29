@@ -9,14 +9,8 @@
 #SBATCH --mem=8G                        
 
 
-# Check for correct number of arguments
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <input folder>"
-  exit 1
-fi
-
 # Extract argument
-input_folder=$1
+input_folder=inputs_sequential
 
 # Check if input folder exists
 if [ ! -d "$input_folder" ]; then
