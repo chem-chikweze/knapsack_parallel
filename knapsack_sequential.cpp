@@ -1,17 +1,15 @@
 #include <iostream>
-#include <stdlib.h>
+#include <vector>
 #include <chrono>
-#include <iostream>
 #include <fstream>
 #include <sstream>
-#include <iostream>
-#include <vector>
 
 using namespace std;
 
-std::vector<int> weights;
-std::vector<int> values;
-std::vector<std::vector<int>> opt;
+// Declare global variables
+vector<int> weights;
+vector<int> values;
+vector<vector<int>> opt;
 
 int knapsack(int n, int curr, int c)
 {
@@ -110,7 +108,7 @@ int main(int argc, char *argv[])
 	}
 
 	// initialize the array for dynamic programming
-	opt.resize(n, std::vector<int>(c + 1, -1));
+	opt.resize(n, vector<int>(c + 1, -1));
 
 	int highest = knapsack(n, 0, c);
 
@@ -119,4 +117,6 @@ int main(int argc, char *argv[])
 
 	cout << "The maximum value is " << highest << "." << endl;
 	cout << "Duration: " << time.count() << " miliseconds." << endl;
+
+	return 0;
 }
