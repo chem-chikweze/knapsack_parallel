@@ -1,16 +1,8 @@
-#!/bin/bash
-
-
-#SBATCH --job-name=knap_sequential       
-#SBATCH --output=knap_sequential.log    
-#SBATCH --error=knap_sequential_error.log  
-#SBATCH --time=01:00:00                  
-#SBATCH --cpus-per-task=1                
-#SBATCH --mem=8G                        
+#!/bin/bash                    
 
 
 # Extract argument
-input_folder=inputs_sequential
+input_folder=inputs
 
 # Check if input folder exists
 if [ ! -d "$input_folder" ]; then
@@ -19,12 +11,12 @@ if [ ! -d "$input_folder" ]; then
 fi
 
 # Compile the knap_helper.cpp file
-g++ -std=c++11 knapsack_sequential.cpp -o my_program_sequential -pthread
+g++ -std=c++11 knapsack_sequential.cpp -o my_program_sequential 
 
 # Function to run knap_helper for a given input file and thread count
 run_knap_helper() {
   input_file=$1
-  for i in {1..10}; do
+  for i in {1}; do
     ./my_program_sequential "$input_file" >> output_sequential.txt
   done
 }

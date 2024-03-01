@@ -1,2 +1,15 @@
-4.txt 1
-4.txt 1
+1.txt 
+The maximum value is 1426.
+Duration: 2.47421 miliseconds.
+2.txt 
+The maximum value is 304865.
+Duration: 22942.2 miliseconds.
+3.txt 
+The maximum value is 143562.
+Duration: 14248.9 miliseconds.
+4.txt 
+The maximum value is 751184.
+Duration: 70953.4 miliseconds.
+5.txt 
+The maximum value is 447002.
+Duration: 77106.7 miliseconds.
