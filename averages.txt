@@ -1,0 +1,52 @@
+
+Parallel Code:
+File: 1.txt
+        Thread 1: 4.00 ms
+        Thread 2: 4.45 ms
+        Thread 4: 6.29 ms
+        Thread 8: 11.60 ms
+        Thread 16: 20.10 ms
+File: 2.txt
+        Thread 1: 18569.01 ms
+        Thread 2: 13213.64 ms
+        Thread 4: 11844.14 ms
+        Thread 8: 11798.45 ms
+        Thread 16: 11970.83 ms
+File: 3.txt
+        Thread 1: 15766.42 ms
+        Thread 2: 9822.72 ms
+        Thread 4: 5856.69 ms
+        Thread 8: 6162.40 ms
+        Thread 16: 6423.33 ms
+File: 4.txt
+        Thread 1: 59264.31 ms
+        Thread 2: 41154.21 ms
+        Thread 4: 130585.92 ms
+        Thread 8: 66867.01 ms
+        Thread 16: 1813772.68 ms
+File: 5.txt
+        Thread 1: 3858946.50 ms
+        Thread 2: 483930.38 ms
+        Thread 4: 37414.19 ms
+        Thread 8: 141723.33 ms
+        Thread 16: 40344.51 ms
+
+
+Sequential Code:
+1.txt 
+The maximum value is 1426.
+Duration: 1.58732 miliseconds.
+2.txt 
+The maximum value is 304865.
+Duration: 47610.5 miliseconds.
+3.txt 
+The maximum value is 143562.
+Duration: 22606.3 miliseconds.
+4.txt 
+The maximum value is 751184.
+Duration: 70953.4 miliseconds.
+5.txt 
+The maximum value is 447002.
+Duration: 77106.7 miliseconds.
+
+
